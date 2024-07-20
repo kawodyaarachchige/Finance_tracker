@@ -29,8 +29,21 @@
 
     <h2>Transaction History</h2>
 
+    <div class="filter">
+        <label for="filter-category">Filter by Category:</label>
+        <select id="filter-category">
+            <option value="all">All</option>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+        </select>
+    </div>
+
     <ul id="transaction-list"></ul>
+
+    <h2>Income & Expenses Chart</h2>
+    <canvas id="myChart" width="400" height="200"></canvas>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
