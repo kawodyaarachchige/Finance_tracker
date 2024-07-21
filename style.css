@@ -1,5 +1,4 @@
 body {
-    font-family: Arial, sans-serif;
     background-color: #f4f4f4;
     display: flex;
     justify-content: center;
@@ -7,6 +6,9 @@ body {
     margin: 0;
     padding: 20px;
     box-sizing: border-box;
+    font-family: "Be Vietnam Pro", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
 }
 
 .container {

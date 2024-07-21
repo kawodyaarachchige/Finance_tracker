@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const transactionList = document.getElementById('transaction-list');
     const filterCategory = document.getElementById('filter-category');
     const ctx = document.getElementById('myChart').getContext('2d');
+    const exportBtn = document.getElementById('export-btn');
 
     let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
     let myChart;
@@ -83,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         filteredTransactions.forEach(addTransactionDOM);
     }
-
+//chart
     function updateChart() {
         const monthlyData = transactions.reduce((acc, transaction) => {
             const month = transaction.date.slice(0, 7); // Extract YYYY-MM
@@ -132,9 +133,35 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+// Export to CSV
+    function exportToCSV() {
+        const csvRows = [];
+        const headers = ['Date', 'Description', 'Amount', 'Category'];
+        csvRows.push(headers.join(','));
+
+        transactions.forEach(transaction => {
+            const row = [
+                transaction.date,
+                transaction.description,
+                transaction.amount,
+                transaction.category
+            ];
+            csvRows.push(row.join(','));
+        });
+
+        const csvString = csvRows.join('\n');
+        const blob = new Blob([csvString], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'transactions.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
 
     init();
 
     transactionForm.addEventListener('submit', addTransaction);
     filterCategory.addEventListener('change', filterTransactions);
+    exportBtn.addEventListener('click', exportToCSV);
 });
