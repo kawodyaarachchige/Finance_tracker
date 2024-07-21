@@ -1,3 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@100;200;300;400;500;600;700;800;900&display=swap');
+body, h1, ul, li, form, input, select, button {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Be Vietnam Pro", sans-serif;
+}
+
+.toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 1.2em;
+    color: #333333;
+}
+
 body {
     background-color: #f4f4f4;
     display: flex;
@@ -5,25 +21,24 @@ body {
     align-items: center;
     margin: 0;
     padding: 20px;
-    box-sizing: border-box;
-    font-family: "Be Vietnam Pro", sans-serif;
-    font-optical-sizing: auto;
-    font-style: normal;
+    font-size: 16px;
 }
 
 .container {
-    background: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     width: 100%;
-    max-width: 600px;
+    max-width: 700px;
     margin: 0 auto;
 }
 
 h1 {
     text-align: center;
     margin-bottom: 20px;
+    font-size: 2em;
+    color: #333333;
 }
 
 .summary {
@@ -36,28 +51,51 @@ h1 {
 #balance, #income, #expenses {
     margin: 5px 0;
     font-size: 1.2em;
+    font-weight: 600;
+    color: #444444;
 }
 
 form {
     display: flex;
     flex-direction: column;
+    margin-bottom: 20px;
 }
 
 input, select, button {
     margin-bottom: 10px;
-    padding: 10px;
+    padding: 12px;
     border: 1px solid #ddd;
-    border-radius: 3px;
+    border-radius: 5px;
     width: 100%;
     box-sizing: border-box;
+    font-size: 1em;
 }
 
 button {
-    background-color: #28a745;
-    color: #fff;
+    background-color: #007bff;
+    color: #ffffff;
     border: none;
     cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#remove {
+    background-color: #dc3545;
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
     width: fit-content;
+}
+
+#remove:hover {
+    background-color: #a71d2a;
 }
 
 ul {
@@ -68,29 +106,44 @@ ul {
 li {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     padding: 10px;
     border: 1px solid #ddd;
-    border-radius: 3px;
+    border-radius: 5px;
     margin-bottom: 10px;
+    background-color: #fafafa;
+    transition: background-color 0.3s ease;
+}
+
+li:hover {
+    background-color: #f0f0f0;
 }
 
 .income {
-    color: green;
+    color: #28a745;
 }
 
 .expense {
-    color: red;
+    color: #dc3545;
 }
 
-.filter {
+.filter, .search {
     margin-bottom: 20px;
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
+}
+
+.filter label, .search label {
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #555555;
 }
 
 canvas {
     width: 100% !important;
     height: auto !important;
+    margin-top: 20px;
 }
 
 /* Media Queries */
@@ -100,34 +153,30 @@ canvas {
     }
 
     .container {
-        padding: 15px;
+        padding: 20px;
     }
 
     h1 {
-        font-size: 1.5em;
+        font-size: 0.8em;
     }
 
     #balance, #income, #expenses {
-        font-size: 1em;
-    }
-
-    form {
-        flex-direction: column;
+        font-size: 1.1em;
     }
 
     input, select, button {
-        padding: 8px;
+        padding: 10px;
         font-size: 0.9em;
     }
 
     button {
-        padding: 10px;
+        padding: 12px;
     }
 }
 
 @media (max-width: 480px) {
     h1 {
-        font-size: 1.2em;
+        font-size: 0.7rem;
     }
 
     .summary {
@@ -136,15 +185,73 @@ canvas {
     }
 
     #balance, #income, #expenses {
-        font-size: 0.9em;
+        font-size: 1em;
     }
 
     input, select, button {
-        padding: 6px;
+        padding: 8px;
         font-size: 0.8em;
     }
 
     button {
-        padding: 8px;
+        padding: 10px;
     }
+
+    .toggle {
+        position: absolute;
+        right: 20px;
+        font-size: 1.2em;
+        color: #333333;
+    }
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+    background-color: #333;
+    color: #ddd;
+}
+
+body.dark-mode .container {
+    background: #444;
+    color: #ddd;
+}
+
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode button {
+    background-color: #555;
+    color: #ddd;
+    border: 1px solid #777;
+}
+
+body.dark-mode li {
+    background-color: #555;
+    border: 1px solid #777;
+}
+
+body.dark-mode #balance,
+body.dark-mode #income,
+body.dark-mode #expenses {
+    color: #ddd;
+}
+
+body.dark-mode #remove {
+    background-color: #dc3545;
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+    width: fit-content;
+}
+
+body.dark-mode #mode-toggle {
+    color: #ddd;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 2em;
+    color: #333333;
 }

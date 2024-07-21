@@ -2,12 +2,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const transactionForm = document.getElementById('transaction-form');
     const transactionList = document.getElementById('transaction-list');
     const filterCategory = document.getElementById('filter-category');
+    const searchInput = document.getElementById('search');
     const ctx = document.getElementById('myChart').getContext('2d');
     const exportBtn = document.getElementById('export-btn');
-
+    const modeToggle = document.getElementById('mode-toggle');
     let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
     let myChart;
 
+    // Update the summary of income, expenses, and balance
     function updateSummary() {
         let income = transactions
             .filter(transaction => transaction.category === 'income')
@@ -23,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateChart();
     }
 
+    // Add a new transaction to the list
     function addTransaction(e) {
         e.preventDefault();
 
@@ -48,32 +51,37 @@ document.addEventListener('DOMContentLoaded', () => {
         transactionForm.reset();
     }
 
+    // Add a transaction to the DOM
     function addTransactionDOM(transaction) {
         const item = document.createElement('li');
         item.classList.add(transaction.category);
         item.innerHTML = `
             ${transaction.date} - ${transaction.description} - $${transaction.amount}
-            <button class="delete-btn" onclick="removeTransaction(${transaction.id})">x</button>
+            <button id="remove" class="delete-btn" onclick="removeTransaction(${transaction.id})">x</button>
         `;
         transactionList.appendChild(item);
     }
 
+    // Remove a transaction by ID
     window.removeTransaction = function(id) {
         transactions = transactions.filter(transaction => transaction.id !== id);
         localStorage.setItem('transactions', JSON.stringify(transactions));
         init();
     };
 
+    // Generate a unique ID for each transaction
     function generateID() {
         return Math.floor(Math.random() * 100000000);
     }
 
+    // Initialize the application
     function init() {
         transactionList.innerHTML = '';
         transactions.forEach(addTransactionDOM);
         updateSummary();
     }
 
+    // Filter transactions by category
     function filterTransactions() {
         const selectedCategory = filterCategory.value;
         transactionList.innerHTML = '';
@@ -84,7 +92,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
         filteredTransactions.forEach(addTransactionDOM);
     }
-//chart
+
+    // Search transactions by description
+    function searchTransactions() {
+        const searchTerm = searchInput.value.toLowerCase();
+        transactionList.innerHTML = '';
+
+        const filteredTransactions = transactions.filter(transaction =>
+            transaction.description.toLowerCase().includes(searchTerm)
+        );
+
+        filteredTransactions.forEach(addTransactionDOM);
+    }
+
+    // Toggle dark mode
+    modeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        modeToggle.innerHTML = isDarkMode ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    });
+
+    // Update the chart with income and expense data
     function updateChart() {
         const monthlyData = transactions.reduce((acc, transaction) => {
             const month = transaction.date.slice(0, 7); // Extract YYYY-MM
@@ -133,7 +161,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-// Export to CSV
+
+    // Export transactions to CSV
     function exportToCSV() {
         const csvRows = [];
         const headers = ['Date', 'Description', 'Amount', 'Category'];
@@ -161,7 +190,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     init();
 
+    // Event listeners
     transactionForm.addEventListener('submit', addTransaction);
     filterCategory.addEventListener('change', filterTransactions);
+    searchInput.addEventListener('input', searchTransactions);
     exportBtn.addEventListener('click', exportToCSV);
 });
