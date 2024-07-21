@@ -3,12 +3,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const transactionList = document.getElementById('transaction-list');
     const filterCategory = document.getElementById('filter-category');
     const searchInput = document.getElementById('search');
+    const sortBySelect = document.getElementById('sort-by');
     const ctx = document.getElementById('myChart').getContext('2d');
     const exportBtn = document.getElementById('export-btn');
     const modeToggle = document.getElementById('mode-toggle');
     let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
     let myChart;
-
     // Update the summary of income, expenses, and balance
     function updateSummary() {
         let income = transactions
@@ -18,101 +18,28 @@ document.addEventListener('DOMContentLoaded', () => {
             .filter(transaction => transaction.category === 'expense')
             .reduce((acc, transaction) => acc + parseFloat(transaction.amount), 0);
         let balance = income - expenses;
-        document.getElementById('balance').innerHTML = 'Balance: $' + balance.toFixed(2);
-        document.getElementById('income').innerHTML = 'Income: $' + income.toFixed(2);
-        document.getElementById('expenses').innerHTML = 'Expenses: $' + expenses.toFixed(2);
 
-        updateChart();
+        document.getElementById('income').textContent = `Income: $${income.toFixed(2)}`;
+        document.getElementById('expenses').textContent = `Expenses: $${expenses.toFixed(2)}`;
+        document.getElementById('balance').textContent = `Balance: $${balance.toFixed(2)}`;
     }
-
-    // Add a new transaction to the list
-    function addTransaction(e) {
-        e.preventDefault();
-
-        const date = document.getElementById('date').value;
-        const description = document.getElementById('description').value;
-        const amount = document.getElementById('amount').value;
-        const category = document.getElementById('category').value;
-
-        const transaction = {
-            id: generateID(),
-            date,
-            description,
-            amount,
-            category
-        };
-
-        transactions.push(transaction);
-        localStorage.setItem('transactions', JSON.stringify(transactions));
-
-        addTransactionDOM(transaction);
-        updateSummary();
-
-        transactionForm.reset();
-    }
-
-    // Add a transaction to the DOM
+    // Add a new transaction
     function addTransactionDOM(transaction) {
-        const item = document.createElement('li');
-        item.classList.add(transaction.category);
-        item.innerHTML = `
-            ${transaction.date} - ${transaction.description} - $${transaction.amount}
-            <button id="remove" class="delete-btn" onclick="removeTransaction(${transaction.id})">x</button>
+        const li = document.createElement('li');
+        li.className = transaction.category;
+        li.innerHTML = `
+            <span>${transaction.date} - ${transaction.description}</span>
+            <span>$${transaction.amount}</span>
+            <button id="remove" data-id="${transaction.id}">Remove</button>
         `;
-        transactionList.appendChild(item);
+        transactionList.appendChild(li);
     }
-
-    // Remove a transaction by ID
-    window.removeTransaction = function(id) {
-        transactions = transactions.filter(transaction => transaction.id !== id);
-        localStorage.setItem('transactions', JSON.stringify(transactions));
-        init();
-    };
-
-    // Generate a unique ID for each transaction
-    function generateID() {
-        return Math.floor(Math.random() * 100000000);
-    }
-
-    // Initialize the application
-    function init() {
+// Render the transactions
+    function renderTransactions(transactions) {
         transactionList.innerHTML = '';
         transactions.forEach(addTransactionDOM);
-        updateSummary();
     }
-
-    // Filter transactions by category
-    function filterTransactions() {
-        const selectedCategory = filterCategory.value;
-        transactionList.innerHTML = '';
-
-        const filteredTransactions = selectedCategory === 'all'
-            ? transactions
-            : transactions.filter(transaction => transaction.category === selectedCategory);
-
-        filteredTransactions.forEach(addTransactionDOM);
-    }
-
-    // Search transactions by description
-    function searchTransactions() {
-        const searchTerm = searchInput.value.toLowerCase();
-        transactionList.innerHTML = '';
-
-        const filteredTransactions = transactions.filter(transaction =>
-            transaction.description.toLowerCase().includes(searchTerm)
-        );
-
-        filteredTransactions.forEach(addTransactionDOM);
-    }
-
-    // Toggle dark mode
-    modeToggle.addEventListener('click', () => {
-        document.body.classList.toggle('dark-mode');
-        const isDarkMode = document.body.classList.contains('dark-mode');
-        modeToggle.innerHTML = isDarkMode ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-    });
-
-    // Update the chart with income and expense data
+// Update the chart
     function updateChart() {
         const monthlyData = transactions.reduce((acc, transaction) => {
             const month = transaction.date.slice(0, 7); // Extract YYYY-MM
@@ -139,60 +66,167 @@ document.addEventListener('DOMContentLoaded', () => {
                     {
                         label: 'Income',
                         data: incomeData,
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
                         borderColor: 'rgba(75, 192, 192, 1)',
                         borderWidth: 1
                     },
                     {
                         label: 'Expenses',
                         data: expenseData,
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
                         borderColor: 'rgba(255, 99, 132, 1)',
                         borderWidth: 1
                     }
                 ]
             },
             options: {
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += '$' + context.parsed.y;
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
                 scales: {
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Amount ($)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Month'
+                        }
                     }
                 }
             }
         });
     }
-
-    // Export transactions to CSV
+// Export to CSV and PDF
     function exportToCSV() {
         const csvRows = [];
-        const headers = ['Date', 'Description', 'Amount', 'Category'];
-        csvRows.push(headers.join(','));
-
+        csvRows.push(['Date', 'Description', 'Amount', 'Category']);
         transactions.forEach(transaction => {
-            const row = [
-                transaction.date,
-                transaction.description,
-                transaction.amount,
-                transaction.category
-            ];
-            csvRows.push(row.join(','));
+            csvRows.push([transaction.date, transaction.description, transaction.amount, transaction.category]);
         });
-
-        const csvString = csvRows.join('\n');
-        const blob = new Blob([csvString], { type: 'text/csv' });
+        const csvContent = csvRows.map(e => e.join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
-        a.download = 'transactions.csv';
+        a.setAttribute('href', url);
+        a.setAttribute('download', 'transactions.csv');
+        document.body.appendChild(a);
         a.click();
-        URL.revokeObjectURL(url);
+        document.body.removeChild(a);
     }
 
-    init();
+    function exportToPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.text('Transaction History', 10, 10);
+        transactions.forEach((transaction, index) => {
+            doc.text(`${transaction.date} - ${transaction.description} - $${transaction.amount} - ${transaction.category}`, 10, 20 + index * 10);
+        });
+        doc.save('transactions.pdf');
+    }
 
-    // Event listeners
-    transactionForm.addEventListener('submit', addTransaction);
-    filterCategory.addEventListener('change', filterTransactions);
-    searchInput.addEventListener('input', searchTransactions);
-    exportBtn.addEventListener('click', exportToCSV);
+    transactionForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const date = document.getElementById('date').value;
+        const description = document.getElementById('description').value;
+        const amount = document.getElementById('amount').value;
+        const category = document.getElementById('category').value;
+
+        const newTransaction = {
+            id: Date.now(),
+            date,
+            description,
+            amount,
+            category
+        };
+
+        transactions.push(newTransaction);
+        localStorage.setItem('transactions', JSON.stringify(transactions));
+
+        addTransactionDOM(newTransaction);
+        updateSummary();
+        updateChart();
+        transactionForm.reset();
+    });
+
+    transactionList.addEventListener('click', (e) => {
+        if (e.target.id === 'remove') {
+            const id = parseInt(e.target.dataset.id);
+            transactions = transactions.filter(transaction => transaction.id !== id);
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+            renderTransactions(transactions);
+            updateSummary();
+            updateChart();
+        }
+    });
+
+    filterCategory.addEventListener('change', () => {
+        const category = filterCategory.value;
+        let filteredTransactions = transactions;
+        if (category !== 'all') {
+            filteredTransactions = transactions.filter(transaction => transaction.category === category);
+        }
+        renderTransactions(filteredTransactions);
+    });
+
+    searchInput.addEventListener('input', () => {
+        const query = searchInput.value.toLowerCase();
+        const filteredTransactions = transactions.filter(transaction =>
+            transaction.description.toLowerCase().includes(query)
+        );
+        renderTransactions(filteredTransactions);
+    });
+
+    sortBySelect.addEventListener('change', () => {
+        const criterion = sortBySelect.value;
+        const sortedTransactions = [...transactions].sort((a, b) => {
+            if (criterion === 'amount') {
+                return parseFloat(a.amount) - parseFloat(b.amount);
+            } else if (criterion === 'description') {
+                return a.description.localeCompare(b.description);
+            } else {
+                return new Date(a.date) - new Date(b.date);
+            }
+        });
+        renderTransactions(sortedTransactions);
+    });
+
+    exportBtn.addEventListener('click', () => {
+        if (confirm('Export to CSV or PDF? Click OK for CSV, Cancel for PDF.')) {
+            exportToCSV();
+        } else {
+            exportToPDF();
+        }
+    });
+
+    modeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        modeToggle.querySelector('i').classList.toggle('fa-moon');
+        modeToggle.querySelector('i').classList.toggle('fa-sun');
+    });
+
+    updateSummary();
+    updateChart();
+    renderTransactions(transactions);
 });
