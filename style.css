@@ -55,6 +55,7 @@ button {
     color: #fff;
     border: none;
     cursor: pointer;
+    width: fit-content;
 }
 
 ul {
