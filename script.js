@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = document.getElementById('myChart').getContext('2d');
 
     let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-
     let myChart;
 
     function updateSummary() {
@@ -86,25 +85,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateChart() {
-        const incomeData = transactions
-            .filter(transaction => transaction.category === 'income')
-            .map(transaction => ({ date: transaction.date, amount: parseFloat(transaction.amount) }));
+        const monthlyData = transactions.reduce((acc, transaction) => {
+            const month = transaction.date.slice(0, 7); // Extract YYYY-MM
+            if (!acc[month]) {
+                acc[month] = { income: 0, expense: 0 };
+            }
+            acc[month][transaction.category] += parseFloat(transaction.amount);
+            return acc;
+        }, {});
 
-        const expenseData = transactions
-            .filter(transaction => transaction.category === 'expense')
-            .map(transaction => ({ date: transaction.date, amount: parseFloat(transaction.amount) }));
-
-        const dates = [...new Set(transactions.map(transaction => transaction.date))].sort();
-
-        const incomeAmounts = dates.map(date => {
-            const found = incomeData.find(data => data.date === date);
-            return found ? found.amount : 0;
-        });
-
-        const expenseAmounts = dates.map(date => {
-            const found = expenseData.find(data => data.date === date);
-            return found ? found.amount : 0;
-        });
+        const labels = Object.keys(monthlyData).sort();
+        const incomeData = labels.map(label => monthlyData[label].income);
+        const expenseData = labels.map(label => monthlyData[label].expense);
 
         if (myChart) {
             myChart.destroy();
@@ -113,18 +105,18 @@ document.addEventListener('DOMContentLoaded', () => {
         myChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: dates,
+                labels: labels,
                 datasets: [
                     {
                         label: 'Income',
-                        data: incomeAmounts,
+                        data: incomeData,
                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
                         borderColor: 'rgba(75, 192, 192, 1)',
                         borderWidth: 1
                     },
                     {
                         label: 'Expenses',
-                        data: expenseAmounts,
+                        data: expenseData,
                         backgroundColor: 'rgba(255, 99, 132, 0.2)',
                         borderColor: 'rgba(255, 99, 132, 1)',
                         borderWidth: 1
