@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modeToggle = document.getElementById('mode-toggle');
     let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
     let myChart;
-    // Update the summary of income, expenses, and balance
+
     function updateSummary() {
         let income = transactions
             .filter(transaction => transaction.category === 'income')
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('expenses').textContent = `Expenses: $${expenses.toFixed(2)}`;
         document.getElementById('balance').textContent = `Balance: $${balance.toFixed(2)}`;
     }
-    // Add a new transaction
+
     function addTransactionDOM(transaction) {
         const li = document.createElement('li');
         li.className = transaction.category;
@@ -34,15 +34,16 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         transactionList.appendChild(li);
     }
-// Render the transactions
+
     function renderTransactions(transactions) {
         transactionList.innerHTML = '';
         transactions.forEach(addTransactionDOM);
     }
-// Update the chart
+
     function updateChart() {
+        // Prepare data for the chart
         const monthlyData = transactions.reduce((acc, transaction) => {
-            const month = transaction.date.slice(0, 7); // Extract YYYY-MM
+            const month = transaction.date.slice(0, 7);
             if (!acc[month]) {
                 acc[month] = { income: 0, expense: 0 };
             }
@@ -54,10 +55,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const incomeData = labels.map(label => monthlyData[label].income);
         const expenseData = labels.map(label => monthlyData[label].expense);
 
+        // Destroy existing chart if it exists
         if (myChart) {
             myChart.destroy();
         }
 
+        // Create a new chart
         myChart = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -118,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-// Export to CSV and PDF
+
     function exportToCSV() {
         const csvRows = [];
         csvRows.push(['Date', 'Description', 'Amount', 'Category']);
@@ -173,11 +176,28 @@ document.addEventListener('DOMContentLoaded', () => {
     transactionList.addEventListener('click', (e) => {
         if (e.target.id === 'remove') {
             const id = parseInt(e.target.dataset.id);
-            transactions = transactions.filter(transaction => transaction.id !== id);
-            localStorage.setItem('transactions', JSON.stringify(transactions));
-            renderTransactions(transactions);
-            updateSummary();
-            updateChart();
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, remove it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    transactions = transactions.filter(transaction => transaction.id !== id);
+                    localStorage.setItem('transactions', JSON.stringify(transactions));
+                    renderTransactions(transactions);
+                    updateSummary();
+                    updateChart();
+                    Swal.fire(
+                        'Removed!',
+                        'Your transaction has been removed.',
+                        'success'
+                    );
+                }
+            });
         }
     });
 
@@ -213,11 +233,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     exportBtn.addEventListener('click', () => {
-        if (confirm('Export to CSV or PDF? Click OK for CSV, Cancel for PDF.')) {
-            exportToCSV();
-        } else {
-            exportToPDF();
-        }
+        Swal.fire({
+            title: 'Export to CSV or PDF?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'CSV',
+            cancelButtonText: 'PDF'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                exportToCSV();
+            } else {
+                exportToPDF();
+            }
+        });
     });
 
     modeToggle.addEventListener('click', () => {
@@ -226,6 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modeToggle.querySelector('i').classList.toggle('fa-sun');
     });
 
+    // Initial load
     updateSummary();
     updateChart();
     renderTransactions(transactions);

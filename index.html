@@ -11,8 +11,16 @@
 </head>
 <body>
 <div class="container">
-    <div class="toggle"><button id="mode-toggle"><i class="fas fa-moon"></i></button></div>
-    <h1>Finance Tracker</h1>
+    <header>
+        <h1>Finance Tracker</h1>
+        <div class="header-actions">
+            <div class="search">
+                <input type="text" id="search" placeholder="Search transactions">
+            </div>
+            <button id="mode-toggle"><i class="fas fa-moon"></i></button>
+        </div>
+    </header>
+
     <div class="summary">
         <div id="balance">Balance: $0.00</div>
         <div id="income">Income: $0.00</div>
@@ -29,12 +37,6 @@
         </select>
         <button type="submit">Add Transaction</button>
     </form>
-
-    <div class="search">
-        <input type="text" id="search" placeholder="Search transactions...">
-    </div>
-
-    <h2>Transaction History</h2>
 
     <div class="filter">
         <label for="filter-category">Filter by Category:</label>
@@ -61,5 +63,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@latest/dist/jspdf.umd.min.js"></script>
 <script src="script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
 </body>
 </html>
