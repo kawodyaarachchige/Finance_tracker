@@ -10,6 +10,9 @@ The Personal Finance Tracker is a web application designed to help users manage 
 - **Export to CSV:** Export transaction data to a CSV file for further analysis.
 - **Dark Mode:** Toggle between light and dark themes for better visibility and personal preference.
 
+![App Screenshot](https://imgur.com/1HwSBUP.png)
+ <hr>
+
 ## Technologies Used
 
 - HTML5: For structuring the web content.
