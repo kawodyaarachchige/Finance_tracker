@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         li.innerHTML = `
             <span>${transaction.date} - ${transaction.description}</span>
             <span>$${transaction.amount}</span>
-            <button id="remove" data-id="${transaction.id}">Remove</button>
+            <button id="remove" data-id="${transaction.id}">X</button>
         `;
         transactionList.appendChild(li);
     }
